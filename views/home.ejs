@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/styles.css">
+    <title>  Quick Group Chat App </title>
+</head>
+<body>
+    <div id="group-chat">
+        <h2>Quick Group Chat App</h2>
+        <div id="chat-window">
+            <div id="output"></div>
+            <div id="feedback"></div>
+        </div>
+        <input id="handle" type="text" placeholder="Handle" />
+        <input id="message" type="text" placeholder="Message" />
+        <button id="send">Send</button>
+    </div>
+
+    <script>
+        var socket = io.connect("http://localhost:3000");
+        //Query DOM
+        var message = document.getElementById("message");
+        var handle = document.getElementById("handle");
+        var btn = document.getElementById("send");
+        var output = document.getElementById("output");
+        var feedback = document.getElementById("feedback");
+        //Emit events;
+        btn.addEventListener('click' , ()=>{
+                socket.emit('chat' , {
+                    message:message.value,
+                    handle:handle.value
+                });
+                message.value="";
+
+        });
+        message.addEventListener('keypress',()=>{
+            socket.emit('typing' ,  handle.value  );
+        });
+
+        //listen for events
+        socket.on('chat' , (data)=>{
+            output.innerHTML+="<p><strong style='color:red'>" +data.handle+"</strong> : "+data.message+"</p>";
+            feedback.innerHTML="";
+        })
+        socket.on('typing' , (data)=>{
+            console.log(data);
+            feedback.innerHTML="<p><strong>"+data+ " is typing.." +"</strong></p>";
+        })
+
+    </script>
+</body>
+</html>
+
